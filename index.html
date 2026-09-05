@@ -16,13 +16,28 @@
     }
 
     body {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      background-color: #0f172a;
       color: #ffffff;
       min-height: 100vh;
       padding: 50px 20px 30px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Фоновый контейнер для GIF */
+    #bg-gif {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.85; /* Легкая затемненность для читаемости */
+      transition: opacity 0.5s ease-in-out;
     }
 
     h1 {
@@ -30,6 +45,7 @@
       font-weight: 700;
       margin-bottom: 20px;
       opacity: 0.9;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
 
     .search-box {
@@ -42,8 +58,8 @@
 
     input {
       flex: 1;
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 14px;
       padding: 12px 16px;
       color: #fff;
@@ -54,12 +70,12 @@
     }
 
     input::placeholder {
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(255, 255, 255, 0.65);
     }
 
     button {
-      background: rgba(255, 255, 255, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       border-radius: 14px;
       padding: 12px 20px;
       color: #fff;
@@ -89,6 +105,7 @@
       font-size: 24px;
       font-weight: 700;
       margin-bottom: 8px;
+      word-wrap: break-word;
     }
 
     .temp {
@@ -141,6 +158,9 @@
 </head>
 <body>
 
+  <!-- Фоновая GIF-анимация -->
+  <img id="bg-gif" src="" alt="Weather BG" style="display: none;">
+
   <h1>LiWeather</h1>
 
   <div class="search-box">
@@ -160,9 +180,26 @@
   </div>
 
   <script>
+    // Карта GIF-анимаций (используем прямые ссылки)
+    function getGifUrl(code, isDay) {
+      if ([0, 1, 2].includes(code)) return "https://media.giphy.com/media/u01ioCe6G8URG/giphy.gif"; // Ясно / Облачно
+      if (code === 3) return "https://media.giphy.com/media/3o1S4Yy28y23i80132/giphy.gif"; // Пасмурно
+      if ([45, 48].includes(code)) return "https://media.giphy.com/media/3oEHMv9z5YxM69M8NO/giphy.gif"; // Туман
+      if ([51, 53, 55, 61, 63, 65, 80, 81].includes(code)) return "https://media.giphy.com/media/t773S4RzC84M8/giphy.gif"; // Дождь
+      if ([95, 96, 99].includes(code)) return "https://media.giphy.com/media/13f7v09q4M6fG8/giphy.gif"; // Гроза
+      if ([71, 73, 75, 77, 85, 86].includes(code)) return "https://media.giphy.com/media/l2JHRhAtnJSDNJ2py/giphy.gif"; // Снег
+      return "https://media.giphy.com/media/3o1S4Yy28y23i80132/giphy.gif";
+    }
+
+    function setBackgroundGif(code, isDay) {
+      const bgImg = document.getElementById('bg-gif');
+      const url = getGifUrl(code, isDay);
+      bgImg.src = url;
+      bgImg.style.display = 'block';
+    }
+
     async function getWeather(city) {
       try {
-        // Геокодинг
         const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=ru&format=json`);
         const geoData = await geoRes.json();
 
@@ -174,22 +211,25 @@
         const loc = geoData.results[0];
         const fullCity = loc.country ? `${loc.name}, ${loc.country}` : loc.name;
 
-        // Погода
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&forecast_days=16&timezone=auto`);
+        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&forecast_days=16&timezone=auto`);
         const data = await weatherRes.json();
 
         const current = data.current_weather;
         const temp = Math.round(current.temperature);
+        const code = current.weathercode;
+        const isDay = current.is_day === 1;
         
         document.getElementById('cityName').innerText = fullCity;
         document.getElementById('currentTemp').innerText = `${temp > 0 ? '+' : ''}${temp}°C`;
         document.getElementById('weatherStatus').innerText = 'Обновлено';
 
-        // Рендер 16 дней
+        // Устанавливаем GIF-фон
+        setBackgroundGif(code, isDay);
+
+        // Рендер прогноза
         const daily = data.daily;
         const listContainer = document.getElementById('forecastList');
         listContainer.innerHTML = '';
-
         const daysMap = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
         daily.time.forEach((timeStr, i) => {
@@ -217,8 +257,8 @@
       if (city) getWeather(city);
     }
 
-    // Запуск при старте
     getWeather('Южно-Сахалинск');
   </script>
 </body>
 </html>
+
