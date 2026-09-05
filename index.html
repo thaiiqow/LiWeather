@@ -183,11 +183,11 @@
     // Карта GIF-анимаций (используем прямые ссылки)
     function getGifUrl(code, isDay) {
       if ([0, 1, 2].includes(code)) return "https://github.com/thaiiqow/LiWeather/blob/main/Media/clear_clouds.gif?raw=true"; // Ясно / Облачно
-      if (code === 3) return "https://media.giphy.com/media/3o1S4Yy28y23i80132/giphy.gif"; // Пасмурно
-      if ([45, 48].includes(code)) return "https://media.giphy.com/media/3oEHMv9z5YxM69M8NO/giphy.gif"; // Туман
-      if ([51, 53, 55, 61, 63, 65, 80, 81].includes(code)) return "https://media.giphy.com/media/t773S4RzC84M8/giphy.gif"; // Дождь
-      if ([95, 96, 99].includes(code)) return "https://media.giphy.com/media/13f7v09q4M6fG8/giphy.gif"; // Гроза
-      if ([71, 73, 75, 77, 85, 86].includes(code)) return "https://media.giphy.com/media/l2JHRhAtnJSDNJ2py/giphy.gif"; // Снег
+      if (code === 3) return "https://github.com/thaiiqow/LiWeather/blob/main/Media/overcast.gif?raw=true"; // Пасмурно
+      if ([45, 48].includes(code)) return "https://github.com/thaiiqow/LiWeather/blob/main/Media/haze.gif?raw=true"; // Туман
+      if ([51, 53, 55, 61, 63, 65, 80, 81].includes(code)) return "https://github.com/thaiiqow/LiWeather/blob/main/Media/rain.gif?raw=true"; // Дождь
+      if ([95, 96, 99].includes(code)) return "https://github.com/thaiiqow/LiWeather/blob/main/Media/thunderstorm.gif?raw=true"; // Гроза
+      if ([71, 73, 75, 77, 85, 86].includes(code)) return "https://github.com/thaiiqow/LiWeather/blob/main/Media/snow.gif?raw=true"; // Снег
       return "https://media.giphy.com/media/3o1S4Yy28y23i80132/giphy.gif";
     }
 
